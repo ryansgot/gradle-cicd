@@ -3,7 +3,6 @@ package com.fsryan.gradle.cicd
 import org.gradle.api.tasks.Internal
 
 open class GradleCICDExt {
-    var initialVersion: String = "0.0.1"
     var developBranchName: String = "develop"
     var releaseBranchName: String = "release"
     var devLaunchBranch: String = "master"
