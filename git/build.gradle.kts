@@ -77,5 +77,5 @@ bintray {
 
 project.afterEvaluate {
     checkNotNull(project.tasks.findByName("release"))
-//            .dependsOn(checkNotNull(project.tasks.findByName("bintrayUpload")))
+            .dependsOn(checkNotNull(project.tasks.findByName("bintrayUpload")))
 }
