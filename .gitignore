@@ -1,5 +1,9 @@
 **/*.iml
 **/.idea/*
 
+
+core/build/*
+git/build/*
+
 .gradle/*
 build/*

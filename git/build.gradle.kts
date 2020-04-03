@@ -2,6 +2,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
+    id("java-gradle-plugin")
     kotlin("jvm") version "1.3.71"
     id("com.jfrog.bintray")
     id("maven-publish")

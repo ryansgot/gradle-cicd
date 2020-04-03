@@ -41,39 +41,41 @@ abstract class GradleCICDPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         ext = project.extensions.create(GradleCICDExt.NAME, GradleCICDExt::class.java)
-        vcsApi = createVcsApi(project)
+        project.afterEvaluate {
+            vcsApi = createVcsApi(project)
 
-        branch = (project.findProperty("cicd.branch.override") ?: vcsApi.abbreviatedRevParse()).toString()
-        log("current branch is: $branch")
+            branch = (project.findProperty("cicd.branch.override") ?: vcsApi.abbreviatedRevParse()).toString()
+            log("current branch is: $branch")
 
-        val lastVersion = findLastVersion()
-        semanticVersion = SemanticVersion.parse(lastVersion)
-        log("last version string: '$lastVersion' -> semantic version: '$semanticVersion'")
+            val lastVersion = findLastVersion()
+            semanticVersion = SemanticVersion.parse(lastVersion)
+            log("last version string: '$lastVersion' -> semantic version: '$semanticVersion'")
 
-        val description = createCICDTaskDescription()
-        log("CI/CD task will: $description")
-        val cicdTask: Task = project.createPerformCICDTask(description)
+            val description = createCICDTaskDescription()
+            log("CI/CD task will: $description")
+            val cicdTask: Task = project.createPerformCICDTask(description)
 
-        if (branch == ext.developBranchName) {
-            project.tasks.whenTaskAdded {
-                // TODO: make this less specific to App Center by means of an extension
-                if (ext.developBranchTaskDependencyPaths.contains(it.path)) {
-                    cicdTask.dependsOn(it.path)
-                    log("set CI/CD task dependent upon ${it.path}")
+            if (branch == ext.developBranchName) {
+                project.tasks.whenTaskAdded {
+                    // TODO: make this less specific to App Center by means of an extension
+                    if (ext.developBranchTaskDependencyPaths.contains(it.path)) {
+                        cicdTask.dependsOn(it.path)
+                        log("set CI/CD task dependent upon ${it.path}")
+                    }
                 }
             }
-        }
 
-        if (branch == ext.releaseBranchName) {
-            project.tasks.whenTaskAdded {
-                if (ext.releaseBranchTaskDependencyPaths.contains(it.path)) {
-                    cicdTask.dependsOn(it.path)
-                    log("set CI/CD task dependent upon ${it.path}")
+            if (branch == ext.releaseBranchName) {
+                project.tasks.whenTaskAdded {
+                    if (ext.releaseBranchTaskDependencyPaths.contains(it.path)) {
+                        cicdTask.dependsOn(it.path)
+                        log("set CI/CD task dependent upon ${it.path}")
+                    }
                 }
             }
-        }
 
-        project.createPrintReleaseNotestTask()
+            project.createPrintReleaseNotestTask()
+        }
     }
 
     private fun createCICDTaskDescription() = when (branch) {
@@ -154,10 +156,12 @@ abstract class GradleCICDPlugin : Plugin<Project> {
             authorName = "CI/CD"
     ).also { log(it) }
 
-    private fun findLastVersion(): String {
+    private fun findLastVersion(): String = try {
         val commit = vcsApi.findLastPrettyCommitIncludingTextInSubject("bump version to")
         val delim = commit.lastIndexOf(" ")
-        return commit.substring(delim + 1).replace(Regex("[^0-9.]"), "")
+        commit.substring(delim + 1).replace(Regex("[^0-9.]"), "")
+    } catch (ex: IllegalStateException) {
+        ext.initialVersion
     }
 
     abstract fun log(message: String)

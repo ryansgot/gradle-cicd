@@ -1,14 +1,16 @@
 package com.fsryan.gradle.cicd
 
-class GradleCICDExt {
+import org.gradle.api.tasks.Internal
 
-    lateinit var developBranchName: String
-    lateinit var releaseBranchName: String
-    lateinit var devLaunchBranch: String
-    lateinit var developBranchTaskDescription: String
-    lateinit var releaseBranchTaskDescription: String
-    val developBranchTaskDependencyPaths = mutableSetOf<String>()
-    val releaseBranchTaskDependencyPaths = mutableSetOf<String>()
+open class GradleCICDExt {
+    var initialVersion: String = "0.0.1"
+    var developBranchName: String = "develop"
+    var releaseBranchName: String = "release"
+    var devLaunchBranch: String = "master"
+    var developBranchTaskDescription: String = "$developBranchName branch CI/CD tasks"
+    var releaseBranchTaskDescription: String = "$releaseBranchName branch CI/CD tasks"
+    var developBranchTaskDependencyPaths: Set<String> = mutableSetOf()
+    var releaseBranchTaskDependencyPaths: Set<String> = mutableSetOf()
 
     companion object {
         const val NAME = "gradleCICD"
